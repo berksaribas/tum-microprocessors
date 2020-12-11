@@ -1,9 +1,11 @@
 .PHONY:exe 
 
 PROGRAM = toupper
+ASM_AVX2 = toupper_avx2
 SHELL := /bin/bash
 
 sources = $(PROGRAM).c
+assembly = $(ASM_AVX2).asm
 
 VARIANTS = $(PROGRAM)_variant1
 VARIANTS += $(PROGRAM)_variant2 
@@ -12,11 +14,12 @@ VARIANTS += $(PROGRAM)_variant4
 
 
 ICC = icc -fsource-asm -fno-alias -lm $(sources)
-GCC = gcc -lm -march=native $(sources)
-$(PROGRAM)_variant1 = $(GCC) -O0 
-$(PROGRAM)_variant2 = $(GCC) -O1
-$(PROGRAM)_variant3 = $(GCC) -O2
-$(PROGRAM)_variant4 = $(GCC) -O3
+GCC = gcc -lm -no-pie -march=native $(sources)
+NASM = @type nasm >/dev/null 2>&1 -felf64
+$(PROGRAM)_variant1 = $(NASM) $(assembly) && $(GCC) $(ASM_AVX2).o -O0 || $(GCC) $(ASM_AVX2).o -O0 
+$(PROGRAM)_variant2 = $(NASM) $(assembly) && $(GCC) $(ASM_AVX2).o -O1 || $(GCC) $(ASM_AVX2).o -O1 
+$(PROGRAM)_variant3 = $(NASM) $(assembly) && $(GCC) $(ASM_AVX2).o -O2 || $(GCC) $(ASM_AVX2).o -O2 
+$(PROGRAM)_variant4 = $(NASM) $(assembly) && $(GCC) $(ASM_AVX2).o -O3 || $(GCC) $(ASM_AVX2).o -O3 
 
 PARAMS = 80000
 

@@ -6,7 +6,7 @@
 #include "options.h"
 #include <smmintrin.h>
 #include <pmmintrin.h>
-
+void toupper_avx2(char* text, int len);
 int debug = 0;
 double *results;
 double *ratios;
@@ -58,7 +58,7 @@ static void toupper_optimised_berk(char * text) {
 }
 
 static void toupper_optimised_yunus(char * text) {
-
+	 toupper_avx2(text,strlen(text));
 }
 
 static void toupper_optimised_akif(char * text) {
