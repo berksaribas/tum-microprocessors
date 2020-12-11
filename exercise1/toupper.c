@@ -87,6 +87,29 @@ static void toupper_optimised_otto(char * text) {
 	}
 }
 
+static void toupper_optimised_otto_prefetch(char * text) {
+	int text_index = 0;
+  char * text_end = text + strlen(text);
+
+	__m128i lower_limit = _mm_set1_epi8('a');
+	__m128i upper_limit = _mm_set1_epi8('z');
+	__m128i substract = _mm_set1_epi8(32);
+
+	while(text < text_end) {
+    __builtin_prefetch(text + 16 * 25);
+
+		__m128i loaded_text = _mm_load_si128((__m128i*) text);
+
+		__m128i greater = _mm_cmpgt_epi8(loaded_text, lower_limit);
+		__m128i lower = _mm_cmplt_epi8(loaded_text, upper_limit);
+
+		__m128i mask = _mm_and_si128(substract, _mm_and_si128(greater, lower) );
+		_mm_store_si128( (__m128i*) (text), _mm_sub_epi8(loaded_text, mask) );
+
+		text += 16;
+	}
+}
+
 
 /*****************************************************************/
 
@@ -164,6 +187,7 @@ struct _toupperversion {
     { "optimised_yunus", toupper_optimised_yunus },
     { "optimised_akif", toupper_optimised_akif },
     { "optimised_otto", toupper_optimised_otto },
+    { "optimised_otto_prefetch", toupper_optimised_otto_prefetch },
     { 0,0 }
 };
 
