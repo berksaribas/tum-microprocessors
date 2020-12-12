@@ -171,8 +171,8 @@ static void toupper_optimised_yunus_pthread(char* text){
 #endif
 }
 
-int main(){
-   char m_str[] = "Here is a sample string,azzzsdjasdasd";
+int main() {
+	char m_str[] = "Here is a sample string,azzzsdjasdasd";
     char m_str2[] = "aaaaasasjzzzdasa";
     char m_str3[] = "Here is a sazxxwwxyyzmple string,asdjasdzzzwwzzxxasd";
     char m_str4[] = "HedHere is a sazxxwwxyyzmple string,asdjasdzzzwwzzxxasdHere is a sazxxwwxyyzmple string,asdjasdzzzwwzzxxasd";

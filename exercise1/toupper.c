@@ -14,7 +14,7 @@ struct args {
 	unsigned int len;
 };
 #define NUM_THREADS 8
-// Uncomment runtime # of threads determination
+// Uncomment for runtime # of threads determination
 #define THREAD_INFO_STATIC
 void toupper_avx2(char* text, int len);
 void* toupper_avx2_pthread(void* args);
@@ -190,8 +190,7 @@ static void toupper_optimised_yunus_pthread(char* text){
 /*****************************************************************/
 
 // align at 16byte boundaries
-void* mymalloc(unsigned long int size)
-{
+void* mymalloc(unsigned long int size) {
      void* addr = malloc(size+32);
      return (void*)((unsigned long int)addr /16*16+16);
 }
@@ -211,7 +210,7 @@ char createChar(int ratio){
 
 }
 
-char * init(unsigned long int sz, int ratio){
+char * init(unsigned long int sz, int ratio) {
     int i=0;
     char *text = (char *) mymalloc(sz+1);
     srand(1);// ensures that all strings are identical
@@ -229,8 +228,7 @@ char * init(unsigned long int sz, int ratio){
 
 typedef void (*toupperfunc)(char *text);
 
-void run_toupper(int size, int ratio, int version, toupperfunc f, const char* name)
-{
+void run_toupper(int size, int ratio, int version, toupperfunc f, const char* name) {
    double start, stop;
 		int index;
 
@@ -265,19 +263,18 @@ struct _toupperversion {
 	{ 0,0 },
 };
 
-void run(int size, int ratio)
-{
+void run(int size, int ratio) {
 	int v;
 	for(v=0; toupperversion[v].func !=0; v++) {
 		run_toupper(size, ratio, v, toupperversion[v].func, toupperversion[v].name);
 	}
 }
 
-void printresults(){
+void printresults() {
 	int i,j,k,index;
 	printf("%s\n", OPTS);
 
-	for(j=0;j<no_sz;j++){
+	for(j=0;j<no_sz;j++) {
 		for(k=0;k<no_ratio;k++){
 			printf("Size: %ld \tRatio: %f \tRunning time:", sizes[j], ratios[k]);
 			for(i=0;i<no_version;i++){
@@ -291,35 +288,34 @@ void printresults(){
 	}
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     unsigned long int min_sz=8003043, max_sz = 0, step_sz = 10000;
-		int min_ratio=50, max_ratio = 0, step_ratio = 1;
-		int arg,i,j,v;
-		int no_exp;
+	int min_ratio=50, max_ratio = 0, step_ratio = 1;
+	int arg,i,j,v;
+	int no_exp;
 
-		for(arg = 1;arg<argc;arg++){
-			if(0==strcmp("-d",argv[arg])){
-				debug = 1;
-			}
-			if(0==strcmp("-l",argv[arg])){
-					min_sz = atoi(argv[arg+1]);
-					if(arg+2>=argc) break;
-					if(0==strcmp("-r",argv[arg+2])) break;
-					if(0==strcmp("-d",argv[arg+2])) break;
-					max_sz = atoi(argv[arg+2]);
-					step_sz = atoi(argv[arg+3]);
-			}
-			if(0==strcmp("-r",argv[arg])){
-					min_ratio = atoi(argv[arg+1]);
-					if(arg+2>=argc) break;
-					if(0==strcmp("-l",argv[arg+2])) break;
-					if(0==strcmp("-d",argv[arg+2])) break;
-					max_ratio = atoi(argv[arg+2]);
-					step_ratio = atoi(argv[arg+3]);
-			}
-
+	for(arg = 1;arg<argc;arg++){
+		if(0==strcmp("-d",argv[arg])){
+			debug = 1;
 		}
+		if(0==strcmp("-l",argv[arg])){
+				min_sz = atoi(argv[arg+1]);
+				if(arg+2>=argc) break;
+				if(0==strcmp("-r",argv[arg+2])) break;
+				if(0==strcmp("-d",argv[arg+2])) break;
+				max_sz = atoi(argv[arg+2]);
+				step_sz = atoi(argv[arg+3]);
+		}
+		if(0==strcmp("-r",argv[arg])){
+				min_ratio = atoi(argv[arg+1]);
+				if(arg+2>=argc) break;
+				if(0==strcmp("-l",argv[arg+2])) break;
+				if(0==strcmp("-d",argv[arg+2])) break;
+				max_ratio = atoi(argv[arg+2]);
+				step_ratio = atoi(argv[arg+3]);
+		}
+
+	}
     for(v=0; toupperversion[v].func !=0; v++)
 		no_version=v+1;
 		if(0==max_sz)  no_sz =1;
