@@ -14,7 +14,7 @@ VARIANTS += $(PROGRAM)_variant4
 
 
 ICC = icc -fsource-asm -fno-alias -lm $(sources)
-GCC = gcc -lm -no-pie -march=native $(sources)
+GCC = gcc -lm -no-pie -march=native -fopenmp $(sources)
 NASM = @type nasm >/dev/null 2>&1 -felf64
 $(PROGRAM)_variant1 = $(NASM) $(assembly) && $(GCC) $(ASM_AVX2).o -O0 || $(GCC) $(ASM_AVX2).o -O0 
 $(PROGRAM)_variant2 = $(NASM) $(assembly) && $(GCC) $(ASM_AVX2).o -O1 || $(GCC) $(ASM_AVX2).o -O1 

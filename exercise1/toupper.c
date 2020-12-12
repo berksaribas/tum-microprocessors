@@ -36,14 +36,14 @@ static void toupper_simple(char * text) {
 
 
 static void toupper_optimised_berk(char * text) {
-	int text_index = 0;
 	int text_length = strlen(text);
+	int iterations = text_length / 16;
 
-	__m128i lower_limit = _mm_set1_epi8('a');
-	__m128i upper_limit = _mm_set1_epi8('z');
+	__m128i lower_limit = _mm_set1_epi8('a' - 1);
+	__m128i upper_limit = _mm_set1_epi8('z' + 1);
 	__m128i substract = _mm_set1_epi8(32);
 
-	while(text_index < text_length) {
+	for(int i = 0; i < iterations; i++) {
 		__m128i loaded_text = _mm_loadu_si128((__m128i*) text);
 
 		__m128i greater = _mm_cmpgt_epi8(loaded_text, lower_limit);
@@ -52,8 +52,43 @@ static void toupper_optimised_berk(char * text) {
 		__m128i mask = _mm_and_si128(substract, _mm_and_si128(greater, lower) );
 		_mm_storeu_si128( (__m128i*) (text), _mm_sub_epi8(loaded_text, mask) );
 
-		text_index += 16;
 		text += 16;
+	}
+
+	int remainder = text_length % 16;
+	for(int i = 0; i < remainder; i++) {
+		if(text[i] >= 'a' && text[i] <= 'z') {
+			text[i] -= 32;
+		}
+	}
+}
+
+static void toupper_optimised_berk_openmp(char * text) {
+	int text_length = strlen(text);
+
+	__m128i lower_limit = _mm_set1_epi8('a' - 1);
+	__m128i upper_limit = _mm_set1_epi8('z' + 1);
+	__m128i substract = _mm_set1_epi8(32);
+
+	int iterations = text_length / 16;
+
+	#pragma omp parallel for schedule(static)
+	for(int i = 0; i < iterations; i++) {
+		__m128i loaded_text = _mm_loadu_si128((__m128i*) (text + i*16) );
+
+		__m128i greater = _mm_cmpgt_epi8(loaded_text, lower_limit);
+		__m128i lower = _mm_cmplt_epi8(loaded_text, upper_limit);
+
+		__m128i mask = _mm_and_si128(substract, _mm_and_si128(greater, lower) );
+		_mm_storeu_si128( (__m128i*) (text + i*16), _mm_sub_epi8(loaded_text, mask) );
+	}
+
+	int remainder = text_length % 16;
+	int curr_index = iterations * 16;
+	for(int i = 0; i < remainder; i++) {
+		if(text[curr_index + i] >= 'a' && text[curr_index + i] <= 'z') {
+			text[curr_index + i] -= 32;
+		}
 	}
 }
 
@@ -61,42 +96,16 @@ static void toupper_optimised_yunus(char * text) {
 	 toupper_avx2(text,strlen(text));
 }
 
-static void toupper_optimised_akif(char * text) {
-
-}
-
-static void toupper_optimised_otto(char * text) {
-	int text_index = 0;
-	int text_length = strlen(text);
-
-	__m128i lower_limit = _mm_set1_epi8('a');
-	__m128i upper_limit = _mm_set1_epi8('z');
-	__m128i substract = _mm_set1_epi8(32);
-
-	while(text_index < text_length) {
-		__m128i loaded_text = _mm_load_si128((__m128i*) text);
-
-		__m128i greater = _mm_cmpgt_epi8(loaded_text, lower_limit);
-		__m128i lower = _mm_cmplt_epi8(loaded_text, upper_limit);
-
-		__m128i mask = _mm_and_si128(substract, _mm_and_si128(greater, lower) );
-		_mm_store_si128( (__m128i*) (text), _mm_sub_epi8(loaded_text, mask) );
-
-		text_index += 16;
-		text += 16;
-	}
-}
-
 static void toupper_optimised_otto_prefetch(char * text) {
 	int text_index = 0;
-  char * text_end = text + strlen(text);
+  	char * text_end = text + strlen(text);
 
-	__m128i lower_limit = _mm_set1_epi8('a');
-	__m128i upper_limit = _mm_set1_epi8('z');
+	__m128i lower_limit = _mm_set1_epi8('a' - 1);
+	__m128i upper_limit = _mm_set1_epi8('z' + 1);
 	__m128i substract = _mm_set1_epi8(32);
 
 	while(text < text_end) {
-    __builtin_prefetch(text + 16 * 25);
+    	__builtin_prefetch(text + 16 * 25);
 
 		__m128i loaded_text = _mm_load_si128((__m128i*) text);
 
@@ -185,9 +194,8 @@ struct _toupperversion {
     { "simple",    toupper_simple },
     { "optimised_berk", toupper_optimised_berk },
     { "optimised_yunus", toupper_optimised_yunus },
-    { "optimised_akif", toupper_optimised_akif },
-    { "optimised_otto", toupper_optimised_otto },
     { "optimised_otto_prefetch", toupper_optimised_otto_prefetch },
+    { "optimised_berk_openmp", toupper_optimised_berk_openmp },
     { 0,0 }
 };
 
