@@ -14,14 +14,14 @@ toupper_avx2:
     vmovdqa ymm5, [lc_z] ; z's
     vmovdqa ymm6, [lc_sub_32] ; -32's
 loop:
-    vmovdqu ymm7, [rbx]
+    vmovdqa ymm7, [rbx]
     vpcmpgtb ymm0, ymm7, ymm4 ; > 'a' -1
     vpcmpgtb ymm1, ymm7, ymm5 ; > 'z' 
     vpandn  ymm1, ymm3 ; invert z's i.e <= 'z'
     vpand ymm1, ymm0 ; > 'a' -1 & <= 'z'
     vpand ymm1, ymm6 ; -32 mask 
     vpsubb ymm7, ymm1
-    vmovdqu [rbx], ymm7
+    vmovdqa [rbx], ymm7
     add rbx,32 ; add 32 bytes
     dec rsi
     jnz loop
@@ -45,6 +45,7 @@ p_exit:
     ret
 
 section .data
+ align 16
 lc_a : 
 dq 0x6060606060606060
 dq 0x6060606060606060

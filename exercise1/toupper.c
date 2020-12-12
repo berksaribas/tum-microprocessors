@@ -6,15 +6,18 @@
 #include "options.h"
 #include <smmintrin.h>
 #include <pmmintrin.h>
+#include <pthread.h>
+struct args {
+	char* text;
+	unsigned int len;
+};
 void toupper_avx2(char* text, int len);
+void* toupper_avx2_pthread(void* args);
 int debug = 0;
 double *results;
 double *ratios;
 unsigned long   *sizes;
-
 int no_sz = 1, no_ratio =1, no_version=1;
-
-
 
 static inline
 double gettime(void) {
@@ -23,7 +26,6 @@ double gettime(void) {
 
     return ((double) tv.tv_sec) + ((double) tv.tv_usec / (1000000.0));
 }
-
 
 static void toupper_simple(char * text) {
 	for(int i = 0; text[i] != '\0'; i++) {
@@ -59,10 +61,6 @@ static void toupper_optimised_berk(char * text) {
 
 static void toupper_optimised_yunus(char * text) {
 	 toupper_avx2(text,strlen(text));
-}
-
-static void toupper_optimised_akif(char * text) {
-
 }
 
 static void toupper_optimised_otto(char * text) {
@@ -110,6 +108,50 @@ static void toupper_optimised_otto_prefetch(char * text) {
 	}
 }
 
+static void toupper_optimised_yunus_pthread(char* text){
+	unsigned int eax=11,ebx=0,ecx=1,edx=0;
+	asm volatile("cpuid"
+        : "=a" (eax),
+          "=b" (ebx),
+          "=c" (ecx),
+          "=d" (edx)
+        : "0" (eax), "2" (ecx)
+        : 
+	);
+	//printf("Cores: %d\nThreads: %d\nActual thread: %d\n",eax,ebx,edx);
+	unsigned int i;
+	const unsigned int text_len = strlen(text);
+	const unsigned int num_vectors = text_len / 32;
+	const unsigned int vec_per_thread = num_vectors / ebx; 
+	const unsigned int vec_per_thread_res = num_vectors % ebx;
+    const unsigned int vec_len = vec_per_thread * 32;
+	const unsigned int vec_len_res = vec_per_thread_res * 32;
+	pthread_t* t_arr = (pthread_t*)malloc(ebx  * sizeof(pthread_t));
+	struct args* args = (struct args*)malloc(ebx * sizeof(struct args));
+	pthread_t t_residual;
+	for(i = 0; i < ebx; i++) {
+		args[i].len = vec_len;
+		args[i].text = text + i * vec_len;
+		pthread_create(&t_arr[i], NULL, toupper_avx2_pthread, (void*) &args[i]);
+	}
+	struct args res_arg;
+	res_arg.len = vec_len_res;
+	res_arg.text = text + i * vec_len;
+	pthread_create(&t_residual, NULL, toupper_avx2_pthread, (void*) &res_arg);
+	char* text_fin = text + (text_len - num_vectors * 32);
+	for(int i = 0; text[i] != '\0'; i++) {
+		if(text[i] >= 'a' && text[i] <= 'z') {
+			text[i] -= 32;	
+		}
+	}
+	for(i = 0; i < ebx; i++){
+		pthread_join(t_arr[i], NULL);
+	}
+		pthread_join(t_residual, NULL);
+	free(t_arr);
+	free(args);
+}
+
 
 /*****************************************************************/
 
@@ -148,8 +190,6 @@ char * init(unsigned long int sz, int ratio){
     return text;
 }
 
-
-
 /*
  * ******************* Run the different versions **************
  */
@@ -177,7 +217,7 @@ void run_toupper(int size, int ratio, int version, toupperfunc f, const char* na
 
     if(debug) printf("After:  %.40s...\n",text);
 }
-
+// NOTE: Due to alignment requirements, # of test must be even!
 struct _toupperversion {
     const char* name;
     toupperfunc func;
@@ -185,12 +225,12 @@ struct _toupperversion {
     { "simple",    toupper_simple },
     { "optimised_berk", toupper_optimised_berk },
     { "optimised_yunus", toupper_optimised_yunus },
-    { "optimised_akif", toupper_optimised_akif },
     { "optimised_otto", toupper_optimised_otto },
     { "optimised_otto_prefetch", toupper_optimised_otto_prefetch },
-    { 0,0 }
+    { "optimised_yunus_threaded", toupper_optimised_yunus_pthread },
+    { 0,0 },
+	{ 0,0 }
 };
-
 
 void run(int size, int ratio)
 {
@@ -198,7 +238,6 @@ void run(int size, int ratio)
 	for(v=0; toupperversion[v].func !=0; v++) {
 		run_toupper(size, ratio, v, toupperversion[v].func, toupperversion[v].name);
 	}
-
 }
 
 void printresults(){
