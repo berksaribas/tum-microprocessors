@@ -43,9 +43,9 @@ static void toupper_optimised_yunus(char* text){
 }
 
 int main(){
-    char m_str[] = "Here is a sample string,asdjasdasd";
-    char m_str2[] = "aaaaasasjdasa";
-    char m_str3[] = "Here is a sample string,asdjasdasd";
+    char m_str[] = "Here is a szzzample string,azzzsdjasdasd";
+    char m_str2[] = "aaaaayyysasjzzzdasa";
+    char m_str3[] = "Here is a sazxxwwxyyzmple string,asdjasdzzzwwzzxxasd";
     printf("Before naive: %s\n", m_str);
     toupper_simple(m_str);
     printf("After naive: %s\n", m_str);
