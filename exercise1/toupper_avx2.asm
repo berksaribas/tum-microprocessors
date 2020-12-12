@@ -18,7 +18,6 @@ loop:
     vpcmpgtb ymm0, ymm7, ymm4 ; > 'a' -1
     vpcmpgtb ymm1, ymm7, ymm5 ; > 'z' 
     vpandn  ymm1, ymm3 ; invert z's i.e <= 'z'
-    vmovdqa ymm8, ymm7 ; keep a copy
     vpand ymm1, ymm0 ; > 'a' -1 & <= 'z'
     vpand ymm1, ymm6 ; -32 mask 
     vpsubb ymm7, ymm1
