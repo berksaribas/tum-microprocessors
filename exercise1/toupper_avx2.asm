@@ -3,10 +3,8 @@ section .text
 toupper_avx2:
     push rbx
     mov rbx,rdi
-    mov rcx,rsi
     test rsi,rsi
     jle p_exit
-    and rcx,31 ; get module 31
     shr rsi,5 ; divide by vector size
     jz uwu
     vpcmpeqb ymm3,ymm3,ymm3 ; set 1's. ymm's are 256 bit(32 byte) long 
