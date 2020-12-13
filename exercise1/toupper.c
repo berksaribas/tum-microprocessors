@@ -14,7 +14,7 @@ struct args {
 	unsigned int len;
 };
 #define NUM_THREADS 8
-// Uncomment for runtime # of threads determination
+// Comment for runtime # of threads determination
 #define THREAD_INFO_STATIC
 void toupper_avx2(char* text, int len);
 void* toupper_avx2_pthread(void* args);
