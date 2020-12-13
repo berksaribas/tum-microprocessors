@@ -21,17 +21,17 @@ VARIANTS += $(PROGRAM)_variant8
 
 ICC = icc -fsource-asm -fno-alias -lm -qopenmp $(sources)
 GCC = gcc -lm -no-pie -march=native -pthread -fopenmp $(sources)
-NASM = @type nasm >/dev/null 2>&1 -felf64
+NASM = nasm -felf64
 CLANG = clang -lm -no-pie -march=native -g -pthread -fopenmp=libiomp5 $(sources)
 
-$(PROGRAM)_variant1 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 
-$(PROGRAM)_variant2 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 
-$(PROGRAM)_variant3 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 
-$(PROGRAM)_variant4 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 
-$(PROGRAM)_variant5 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 
-$(PROGRAM)_variant6 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 
-$(PROGRAM)_variant7 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 
-$(PROGRAM)_variant8 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 
+$(PROGRAM)_variant1 =  $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 
+$(PROGRAM)_variant2 =  $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 
+$(PROGRAM)_variant3 =  $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 
+$(PROGRAM)_variant4 =  $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 
+$(PROGRAM)_variant5 =  $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 
+$(PROGRAM)_variant6 =  $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 
+$(PROGRAM)_variant7 =  $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 
+$(PROGRAM)_variant8 =  $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 
 
 PARAMS = 80000
 
@@ -39,6 +39,7 @@ PARAMS = 80000
 
 
 exe: .autoclean $(VARIANTS) Makefile
+	
 	if test -a ./$(PROGRAM)_variant1; then ./$(PROGRAM)_variant1 $(PARAMS) > results1;else rm -f results1; fi
 	if test -a ./$(PROGRAM)_variant2; then ./$(PROGRAM)_variant2 $(PARAMS) > results2;else rm -f results2;fi
 	if test -a ./$(PROGRAM)_variant3; then ./$(PROGRAM)_variant3 $(PARAMS) > results3;else rm -f results3;fi
@@ -60,8 +61,10 @@ exe: .autoclean $(VARIANTS) Makefile
 	cat results;
 	if test -a options.h; then rm options.h;fi
 
+	
 $(PROGRAM)_variant1: $(sources) Makefile
 	echo '#define OPTS "VARIANT1: $($(PROGRAM)_variant1)"' > options.h 
+	$(NASM) $(assembly1) && $(NASM) $(assembly2)
 	$($(PROGRAM)_variant1) -S -o $(PROGRAM)_variant1.s
 	$($(PROGRAM)_variant1) -o $(PROGRAM)_variant1
 $(PROGRAM)_variant2: $(sources) Makefile
