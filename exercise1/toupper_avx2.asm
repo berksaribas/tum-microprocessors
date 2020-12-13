@@ -8,9 +8,9 @@ toupper_avx2:
     shr rsi,5 ; divide by vector size
     jz uwu
     vpcmpeqb ymm3,ymm3,ymm3 ; set 1's. ymm's are 256 bit(32 byte) long 
-    vmovdqa ymm4, [lc_a] ; as
-    vmovdqa ymm5, [lc_z] ; z's
-    vmovdqa ymm6, [lc_sub_32] ; -32's
+    vmovdqu ymm4, [lc_a] ; as
+    vmovdqu ymm5, [lc_z] ; z's
+    vmovdqu ymm6, [lc_sub_32] ; -32's
 loop:
     vmovdqa ymm7, [rbx]
     vpcmpgtb ymm0, ymm7, ymm4 ; > 'a' -1

@@ -191,8 +191,8 @@ static void toupper_optimised_yunus_pthread(char* text){
 
 // align at 16byte boundaries
 void* mymalloc(unsigned long int size) {
-     void* addr = malloc(size+32);
-     return (void*)((unsigned long int)addr /16*16+16);
+     void* addr = malloc(size + 64);
+     return (void*)((unsigned long int)addr /32*32+32);
 }
 
 char createChar(int ratio){
@@ -250,7 +250,7 @@ void run_toupper(int size, int ratio, int version, toupperfunc f, const char* na
 }
 // NOTE: Due to alignment requirements, # of test must be even!
 struct _toupperversion {
-    const char* name;
+    const char name[32];
     toupperfunc func;
 } toupperversion[] = {
     { "simple",    toupper_simple },
@@ -259,7 +259,6 @@ struct _toupperversion {
     { "optimised_otto_prefetch", toupper_optimised_otto_prefetch },
     { "optimised_yunus_threaded", toupper_optimised_yunus_pthread },
 	{ "optimised_berk_openmp", toupper_optimised_berk_openmp },
-	{ 0,0 },
 	{ 0,0 },
 };
 
@@ -323,9 +322,9 @@ int main(int argc, char* argv[]) {
 		if(0==max_ratio)  no_ratio =1;
 		else no_ratio = (max_ratio-min_ratio)/step_ratio+1;
 		no_exp = v*no_sz*no_ratio;
-		results = (double *)malloc(sizeof(double[no_exp]));
-		ratios = (double *)malloc(sizeof(double[no_ratio]));
-		sizes = (long *)malloc(sizeof(long[no_sz]));
+		results = (double *)mymalloc(sizeof(double[no_exp]));
+        ratios = (double *)mymalloc(sizeof(double[no_ratio]));
+        sizes = (long *)mymalloc(sizeof(long[no_sz]));
 
 		for(i=0;i<no_sz;i++)
 			sizes[i] = min_sz + i*step_sz;

@@ -8,9 +8,9 @@ toupper_avx2_pthread:
     jle _p_exit
     shr esi,5 ; divide by vector size
     vpcmpeqb ymm3,ymm3,ymm3 ; set 1's. ymm's are 256 bit(32 byte) long 
-    vmovdqa ymm4, [_lc_a] ; as
-    vmovdqa ymm5, [_lc_z] ; z's
-    vmovdqa ymm6, [_lc_sub_32] ; -32's
+    vmovdqu ymm4, [_lc_a] ; as
+    vmovdqu ymm5, [_lc_z] ; z's
+    vmovdqu ymm6, [_lc_sub_32] ; -32's
 _loop:
     vmovdqa ymm7, [rbx]
     vpcmpgtb ymm0, ymm7, ymm4 ; > 'a' -1

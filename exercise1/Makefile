@@ -13,15 +13,25 @@ VARIANTS = $(PROGRAM)_variant1
 VARIANTS += $(PROGRAM)_variant2 
 VARIANTS += $(PROGRAM)_variant3 
 VARIANTS += $(PROGRAM)_variant4 
+VARIANTS += $(PROGRAM)_variant5 
+VARIANTS += $(PROGRAM)_variant6 
+VARIANTS += $(PROGRAM)_variant7 
+VARIANTS += $(PROGRAM)_variant8 
 
 
-ICC = icc -fsource-asm -fno-alias -lm $(sources)
+ICC = icc -fsource-asm -fno-alias -lm -qopenmp $(sources)
 GCC = gcc -lm -no-pie -march=native -pthread -fopenmp $(sources)
 NASM = @type nasm >/dev/null 2>&1 -felf64
+CLANG = clang -lm -no-pie -march=native -g -pthread -fopenmp=libiomp5 $(sources)
+
 $(PROGRAM)_variant1 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o -O0 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 
 $(PROGRAM)_variant2 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o -O1 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 
 $(PROGRAM)_variant3 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o -O2 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 
 $(PROGRAM)_variant4 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(GCC) $(ASM_AVX2).o -O3 || $(GCC) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 
+$(PROGRAM)_variant5 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o -O0 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O0 
+$(PROGRAM)_variant6 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o -O1 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O1 
+$(PROGRAM)_variant7 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o -O2 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O2 
+$(PROGRAM)_variant8 = $(NASM) $(assembly1) && $(NASM) $(assembly2) && $(CLANG) $(ASM_AVX2).o -O3 || $(CLANG) $(ASM_AVX2).o $(ASM_AVX2_THREADED).o -O3 
 
 PARAMS = 80000
 
