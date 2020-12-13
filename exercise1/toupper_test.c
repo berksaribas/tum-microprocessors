@@ -136,8 +136,8 @@ static void toupper_optimised_yunus_pthread(char* text){
 	pthread_t* t_arr = (pthread_t*)malloc(ebx  * sizeof(pthread_t));
 	struct args* args = (struct args*)malloc(ebx * sizeof(struct args));
 #else
-	struct args args[8]; 
-	pthread_t t_arr[8]; 
+	struct args args[NUM_THREADS]; 
+	pthread_t t_arr[NUM_THREADS]; 
 #endif
 	pthread_t t_residual;
 	for(i = 0; i < ebx; i++) {
