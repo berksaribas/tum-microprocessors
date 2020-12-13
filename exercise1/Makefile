@@ -64,7 +64,7 @@ exe: .autoclean $(VARIANTS) Makefile
 	
 $(PROGRAM)_variant1: $(sources) Makefile
 	echo '#define OPTS "VARIANT1: $($(PROGRAM)_variant1)"' > options.h 
-	$(NASM) $(assembly1) && $(NASM) $(assembly2)
+	($(NASM) $(assembly1) && $(NASM) $(assembly2)) || true
 	$($(PROGRAM)_variant1) -S -o $(PROGRAM)_variant1.s
 	$($(PROGRAM)_variant1) -o $(PROGRAM)_variant1
 $(PROGRAM)_variant2: $(sources) Makefile
