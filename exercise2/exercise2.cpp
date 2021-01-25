@@ -80,9 +80,9 @@ void pointer_chase_access(uint64_t *array, unsigned int size) {
 
 int main () {
     //Pointers are 64 bit on x86-64
-    uint64_t *array = new uint64_t[n * cache_line_length];
+    uint64_t *array = new uint64_t[n];
     
-    for (unsigned int size = 8; size < n; size += 8) {
+    for (unsigned int size = 8; size < 100000; size += 8) {
         pointer_chase_access(array, size);
     }
     
