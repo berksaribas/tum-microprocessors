@@ -53,26 +53,28 @@ void pointer_chase_access(uint64_t *array, unsigned int size) {
     if (size % pointer_stride == 0) return;
     
     //Add chaseable pointers
-    for (unsigned int i = 0; i < size; i++) {
-        array[i * cache_line_length] = (uint64_t) array + (i + pointer_stride) % size * cache_line_length;
+    const int first_elem = pointer_stride % size * cache_line_length;
+    uint64_t idx = first_elem;
+    const uint64_t first_addr = (uint64_t)&array[idx];
+    for (unsigned int i = 1; i < size; i++) {
+        uint32_t stride = (i + pointer_stride) % size * cache_line_length;
+        array[idx] = (uint64_t)array + stride * 8;
+        idx = stride;
     }
+    array[idx] = first_addr;
     
-    unsigned long *next = array;
-    
+    uint64_t*next = array + first_elem;
     // warmup
     for (unsigned int i = 0; i < size; i++) {
         next = (uint64_t *) *next;
     }
-    
     //measure
     auto begin = std::chrono::high_resolution_clock::now();
     
     for (unsigned int i = 0; i < 1000000; i++) {
         next = (uint64_t *) *next;
     }
-    
     auto end = std::chrono::high_resolution_clock::now();
-    
     std::cout << *next << "\t" << size << "\t" << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << std::endl;
 }
 
